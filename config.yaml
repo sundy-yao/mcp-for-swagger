@@ -1,0 +1,42 @@
+# MCP OpenAPI 服务配置文件
+
+mcp:
+  host: "0.0.0.0"
+  port: 8080
+  name: "ticket-mcp"
+  version: "1.0.0"
+  transport: "sse"  # 支持 sse 或 stdio
+
+openapi:
+  path: "./doc/openapi.yaml"
+
+  base_url: "${API_BASE_URL}"  # 从环境变量读取
+  # 认证头从环境变量读取（推荐）或直接在下方配置
+  # headers:
+  #   - "X-Api-Token:${API_AUTH_TOKEN}"
+
+  # 或者直接在配置文件中指定（不推荐用于生产环境）
+  # headers:
+  #   - "X-Api-Token:your-token-here"
+
+# 可选：工具映射配置
+tool_mapping:
+  # 工具名前缀（会自动添加到所有生成的工具名前）
+  prefix: "ticket"
+
+  # 排除的端点（operationId 或 path）
+  exclude:
+    - "healthCheck"
+    - "/health"
+
+  # 只包含特定 tags 的端点（如果指定，其他端点会被忽略）
+  include_tags: []
+
+  # 自定义工具配置（可选，用于覆盖自动生成的配置）
+  custom: []
+
+log:
+  level: "DEBUG"
+  dir: "./logs"
+  file: "app.log"
+  retention_days: 3
