@@ -1,0 +1,63 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(env *)",
+      "Bash(go *)",
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(yarn *)",
+      "Bash(pnpm *)",
+      "Bash(pip *)",
+      "Bash(python3 *)",
+      "Bash(node *)",
+      "Bash(docker *)",
+      "Bash(mkdir *)",
+      "Bash(touch *)",
+      "Bash(rm -r *)",
+      "Bash(rm *)",
+      "Bash(ls *)",
+      "Bash(grep *)",
+      "Bash(sed *)",
+      "WebFetch(domain:mirrors.aliyun.com)",
+      "Bash(curl:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf / *)",
+      "Bash(dd *)",
+      "Bash(chmod *)",
+      "Bash(chown *)",
+      "Bash(mkfs *)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "network": {},
+    "filesystem": {
+      "allowWrite": [
+        "./**"
+      ],
+      "denyRead": [
+        "~/.aws/**",
+        "~/.ssh/**",
+        "~/.gnupg/**",
+        "./.env",
+        "**/.git/**"
+      ]
+    },
+    "env": [
+      "PATH",
+      "LD_LIBRARY_PATH"
+    ],
+    "bind": [
+      "/bin",
+      "/usr/bin",
+      "/usr/lib",
+      "/usr/lib64",
+      "/usr/local/bin",
+      "/opt/homebrew/bin"
+    ]
+  }
+}

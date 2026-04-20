@@ -1,0 +1,467 @@
+openapi: "3.0.0"
+info:
+  title: "工单系统开放 API"
+  version: "1.0.0"
+  description: "工单系统开放 API，支持创建和查询工单"
+
+servers:
+  - url: "http://localhost:8888"
+    description: "Development server"
+
+paths:
+  /open/ticket/createTicket:
+    post:
+      operationId: "createTicket"
+      summary: "创建工单"
+      description: "创建一个新的工单"
+      tags:
+        - "ticket"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTicketRequest"
+      responses:
+        "200":
+          description: "创建成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "400":
+          description: "请求参数错误"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "认证失败"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /open/ticket/getTicketList:
+    get:
+      operationId: "getTicketList"
+      summary: "分页获取工单列表"
+      description: "获取工单列表，支持分页和筛选"
+      tags:
+        - "ticket"
+      parameters:
+        - name: "page"
+          in: "query"
+          description: "页码"
+          required: false
+          schema:
+            type: "integer"
+            default: 1
+        - name: "pageSize"
+          in: "query"
+          description: "每页数量"
+          required: false
+          schema:
+            type: "integer"
+            default: 10
+        - name: "ticketNo"
+          in: "query"
+          description: "工单编号（精确匹配）"
+          required: false
+          schema:
+            type: "string"
+        - name: "title"
+          in: "query"
+          description: "工单标题（模糊搜索）"
+          required: false
+          schema:
+            type: "string"
+        - name: "submitter"
+          in: "query"
+          description: "提交人（模糊搜索）"
+          required: false
+          schema:
+            type: "string"
+        - name: "category"
+          in: "query"
+          description: "工单类别（精确匹配）"
+          required: false
+          schema:
+            type: "string"
+        - name: "priority"
+          in: "query"
+          description: "紧急程度 (low/medium/high/urgent)"
+          required: false
+          schema:
+            type: "string"
+            enum: ["low", "medium", "high", "urgent"]
+        - name: "status"
+          in: "query"
+          description: "工单状态 (pending/processing/resolved/closed/rejected)"
+          required: false
+          schema:
+            type: "string"
+            enum: ["pending", "processing", "resolved", "closed", "rejected"]
+        - name: "handler"
+          in: "query"
+          description: "处理人（模糊搜索）"
+          required: false
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "获取成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketListResponse"
+        "401":
+          description: "认证失败"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /open/ticket/findTicket:
+    get:
+      operationId: "findTicket"
+      summary: "查询工单详情（按 ID）"
+      description: "根据工单 ID 查询工单详情"
+      tags:
+        - "ticket"
+      parameters:
+        - name: "ID"
+          in: "query"
+          description: "工单 ID"
+          required: true
+          schema:
+            type: "integer"
+      responses:
+        "200":
+          description: "查询成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketResponse"
+        "404":
+          description: "工单不存在"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "认证失败"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /open/ticket/getTicketByTicketNo:
+    get:
+      operationId: "getTicketByTicketNo"
+      summary: "查询工单详情（按工单编号）"
+      description: "根据工单编号查询工单详情"
+      tags:
+        - "ticket"
+      parameters:
+        - name: "ticketNo"
+          in: "query"
+          description: "工单编号"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "查询成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetTicketResponse"
+        "404":
+          description: "工单不存在"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "认证失败"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /open/ticket/updateTicket:
+    put:
+      operationId: "updateTicket"
+      summary: "更新工单"
+      description: "更新工单信息"
+      tags:
+        - "ticket"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTicketRequest"
+      responses:
+        "200":
+          description: "更新成功"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+        "404":
+          description: "工单不存在"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: "认证失败"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    CreateTicketRequest:
+      type: "object"
+      required:
+        - "ticketNo"
+        - "title"
+        - "description"
+        - "category"
+        - "priority"
+      properties:
+        ticketNo:
+          type: "string"
+          description: "工单编号（AI 客户端按规则生成：渠道号@MD5(提交人 ID| 标题 | 类别)）"
+        title:
+          type: "string"
+          description: "工单标题 (2-200 字符)"
+          minLength: 2
+          maxLength: 200
+        description:
+          type: "string"
+          description: "工单描述 (至少 10 字符)"
+          minLength: 10
+        category:
+          type: "string"
+          description: "工单类别"
+        priority:
+          type: "string"
+          description: "紧急程度 (low:低 medium:中 high:高 urgent:紧急)"
+          enum: ["low", "medium", "high", "urgent"]
+        submitterID:
+          type: "string"
+          description: "提交人 ID（钉钉/企微 openid，不传则使用 API Token 的 UserID）"
+        submitter:
+          type: "string"
+          description: "提交人姓名 (默认：API 用户)"
+        submitterPhone:
+          type: "string"
+          description: "提交人手机号"
+        submitterSource:
+          type: "string"
+          description: "提交来源 (默认：api)"
+          enum: ["web", "dingtalk", "api", "wechat", "email"]
+        attachment:
+          type: "string"
+          description: "附件路径"
+
+    UpdateTicketRequest:
+      type: "object"
+      required:
+        - "ticketNo"
+        - "title"
+        - "description"
+        - "category"
+        - "priority"
+        - "status"
+      properties:
+        ticketNo:
+          type: "string"
+          description: "工单编号（AI 客户端按规则生成：渠道号@MD5(提交人 ID| 标题 | 类别)）"
+        title:
+          type: "string"
+          description: "工单标题 (2-200 字符)"
+          minLength: 2
+          maxLength: 200
+        description:
+          type: "string"
+          description: "工单描述 (至少 10 字符)"
+          minLength: 10
+        category:
+          type: "string"
+          description: "工单类别"
+        priority:
+          type: "string"
+          description: "紧急程度 (low/medium/high/urgent)"
+          enum: ["low", "medium", "high", "urgent"]
+        status:
+          type: "string"
+          description: "工单状态 (pending/processing/resolved/closed/rejected)"
+          enum: ["pending", "processing", "resolved", "closed", "rejected"]
+        handler:
+          type: "string"
+          description: "处理人姓名"
+        handlerDept:
+          type: "string"
+          description: "处理部门"
+        remark:
+          type: "string"
+          description: "处理备注"
+        attachment:
+          type: "string"
+          description: "附件路径"
+        satisfaction:
+          type: "string"
+          description: "满意度 (very_dissatisfied/dissatisfied/neutral/satisfied/very_satisfied)"
+          enum: ["very_dissatisfied", "dissatisfied", "neutral", "satisfied", "very_satisfied"]
+
+    Ticket:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          description: "工单 ID"
+        ticketNo:
+          type: "string"
+          description: "工单编号"
+        title:
+          type: "string"
+          description: "工单标题"
+        description:
+          type: "string"
+          description: "工单描述"
+        submitter:
+          type: "string"
+          description: "提交人"
+        submitterPhone:
+          type: "string"
+          description: "提交人手机号"
+        submitterSource:
+          type: "string"
+          description: "提交来源"
+        category:
+          type: "string"
+          description: "工单类别"
+        priority:
+          type: "string"
+          description: "紧急程度"
+        status:
+          type: "string"
+          description: "工单状态"
+        handler:
+          type: "string"
+          description: "处理人"
+        handlerDept:
+          type: "string"
+          description: "处理部门"
+        remark:
+          type: "string"
+          description: "处理备注"
+        attachment:
+          type: "string"
+          description: "附件路径"
+        resolveTime:
+          type: "string"
+          format: "date-time"
+          description: "解决时间"
+        closeTime:
+          type: "string"
+          format: "date-time"
+          description: "关闭时间"
+        satisfaction:
+          type: "string"
+          description: "满意度 (very_dissatisfied/dissatisfied/neutral/satisfied/very_satisfied)"
+          enum: ["very_dissatisfied", "dissatisfied", "neutral", "satisfied", "very_satisfied"]
+        createdAt:
+          type: "string"
+          format: "date-time"
+          description: "创建时间"
+        updatedAt:
+          type: "string"
+          format: "date-time"
+          description: "更新时间"
+
+    Response:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          description: "响应码"
+        msg:
+          type: "string"
+          description: "响应消息"
+        data:
+          type: "object"
+          description: "响应数据"
+          properties:
+            duplicate:
+              type: "boolean"
+              description: "是否为重复工单"
+            ticketNo:
+              type: "string"
+              description: "工单编号"
+            id:
+              type: "integer"
+              description: "工单 ID"
+            title:
+              type: "string"
+              description: "工单标题"
+            status:
+              type: "string"
+              description: "工单状态"
+
+    ErrorResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          description: "错误码"
+        msg:
+          type: "string"
+          description: "错误消息"
+        data:
+          type: "object"
+          description: "错误数据"
+
+    GetTicketListResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          description: "响应码"
+        msg:
+          type: "string"
+          description: "响应消息"
+        data:
+          type: "object"
+          properties:
+            list:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/Ticket"
+            total:
+              type: "integer"
+              description: "总数"
+            page:
+              type: "integer"
+              description: "页码"
+            pageSize:
+              type: "integer"
+              description: "每页数量"
+
+    GetTicketResponse:
+      type: "object"
+      properties:
+        code:
+          type: "integer"
+          description: "响应码"
+        msg:
+          type: "string"
+          description: "响应消息"
+        data:
+          $ref: "#/components/schemas/Ticket"
